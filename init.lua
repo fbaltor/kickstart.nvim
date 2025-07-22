@@ -165,6 +165,12 @@ vim.o.scrolloff = 10
 -- See `:help 'confirm'`
 vim.o.confirm = true
 
+-- [[ fbaltor's configurations ]]
+vim.o.tabstop = 2
+vim.o.shiftwidth = 2
+vim.o.expandtab = true
+vim.bo.softtabstop = 2
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -705,6 +711,7 @@ require('lazy').setup({
             workspace_required = true,
             root_markers = { 'deno.json' },
           },
+          rust_analyzer = {},
           --
           lua_ls = {
             -- cmd = { ... },
@@ -970,6 +977,8 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'master',
+    lazy = false,
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
