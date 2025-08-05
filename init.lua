@@ -727,6 +727,17 @@ require('lazy').setup({
               },
             },
           },
+          terraformls = {
+            -- Check ~/.local/share/nvim/lazy/nvim-lspconfig/lsp/terraformls.lua and
+            -- https://github.com/hashicorp/terraform-ls/blob/main/docs/USAGE.md
+            -- currently terraformls (https://github.com/hashicorp/terraform-ls) need
+            -- the `init_options` to pass some settings.
+            --
+            init_options = {
+              ignoreSingleFileWarning = true,
+            },
+          },
+          terraform = {},
         },
         -- This table contains config for all language servers that are *not* installed via Mason.
         -- Structure is identical to the mason table from above.
@@ -996,6 +1007,7 @@ require('lazy').setup({
         'query',
         'vim',
         'vimdoc',
+        'hcl',
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
