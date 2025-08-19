@@ -224,6 +224,20 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- This will properly detect Docker Compose files and set the correct filetype
+vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
+  pattern = {
+    'docker-compose*.yml',
+    'docker-compose*.yaml',
+    'compose.yml',
+    'compose.yaml',
+  },
+  callback = function()
+    vim.bo.filetype = 'yaml.docker-compose'
+  end,
+  desc = 'Set filetype for Docker Compose files',
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -738,6 +752,21 @@ require('lazy').setup({
             },
           },
           terraform = {},
+          docker_language_server = {
+            workspace_required = true,
+            filetypes = { 'dockerfile', 'yaml.docker-compose', 'yml.docker-compose', 'docker-compose.yml' },
+            root_markers = {
+              'Dockerfile',
+              'docker-compose.yaml',
+              'docker-compose.yml',
+              'compose.yaml',
+              'compose.yml',
+              'docker-bake.json',
+              'docker-bake.hcl',
+              'docker-bake.override.json',
+              'docker-bake.override.hcl',
+            },
+          },
         },
         -- This table contains config for all language servers that are *not* installed via Mason.
         -- Structure is identical to the mason table from above.
@@ -935,7 +964,11 @@ require('lazy').setup({
     'navarasu/onedark.nvim',
     priority = 1000, -- make sure to load this before all the other start plugins
     config = function()
-      require('onedark').setup {}
+      require('onedark').setup {
+        style = 'dark',
+        toggle_style_key = '<leader>ts',
+        toggle_style_list = { 'dark' },
+      }
       -- Enable theme
       require('onedark').load()
     end,
