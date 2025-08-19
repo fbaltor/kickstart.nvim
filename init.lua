@@ -224,19 +224,21 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- This will properly detect Docker Compose files and set the correct filetype
-vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
+-- Setting the template types of Terraform
+vim.filetype.add {
   pattern = {
-    'docker-compose*.yml',
-    'docker-compose*.yaml',
-    'compose.yml',
-    'compose.yaml',
+    ['.*%.sh%.tpl'] = { 'sh', { priority = 10 } },
   },
-  callback = function()
-    vim.bo.filetype = 'yaml.docker-compose'
-  end,
-  desc = 'Set filetype for Docker Compose files',
-})
+}
+
+-- Setting docker compose filetype
+vim.filetype.add {
+  pattern = {
+    ['docker%-compose.*%.ya?ml'] = 'yaml.docker-compose',
+    ['compose%.ya?ml'] = 'yaml.docker-compose',
+    ['docker%-compose%.ya?ml%.tpl'] = 'yaml.docker-compose',
+  },
+}
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -754,7 +756,7 @@ require('lazy').setup({
           terraform = {},
           docker_language_server = {
             workspace_required = true,
-            filetypes = { 'dockerfile', 'yaml.docker-compose', 'yml.docker-compose', 'docker-compose.yml' },
+            filetypes = { 'dockerfile', 'yaml.docker-compose', 'yml.docker-compose', 'docker-compose.yml', 'docker-compose.yml.tpl' },
             root_markers = {
               'Dockerfile',
               'docker-compose.yaml',
@@ -767,6 +769,7 @@ require('lazy').setup({
               'docker-bake.override.hcl',
             },
           },
+          bashls = {},
         },
         -- This table contains config for all language servers that are *not* installed via Mason.
         -- Structure is identical to the mason table from above.
