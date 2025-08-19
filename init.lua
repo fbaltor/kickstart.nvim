@@ -961,16 +961,60 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+
     'navarasu/onedark.nvim',
-    priority = 1000, -- make sure to load this before all the other start plugins
+    priority = 1000,
     config = function()
+      -- Function to read theme state from file
+      local function read_theme_state()
+        local theme_file = vim.fn.expand '~/.config/theme_state'
+        local file = io.open(theme_file, 'r')
+        if file then
+          local content = file:read '*line'
+          file:close()
+          if content then
+            return content:match('^%s*(.-)%s*$'):lower()
+          end
+        end
+        return 'dark'
+      end
+
+      -- Read current theme
+      local theme_state = read_theme_state()
+      local dark_styles = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer' }
+      local is_dark = false
+      for _, style in ipairs(dark_styles) do
+        if theme_state == style or theme_state == 'dark' then
+          is_dark = true
+          break
+        end
+      end
+
+      local initial_style = is_dark and 'dark' or 'light'
+
+      -- Setup and load the theme
       require('onedark').setup {
-        style = 'dark',
-        toggle_style_key = '<leader>ts',
-        toggle_style_list = { 'dark' },
+        style = initial_style,
+        toggle_style_key = nil, -- we will handle toggle manually
+        toggle_style_list = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light' },
       }
-      -- Enable theme
       require('onedark').load()
+
+      -- Track current style
+      local current_style = initial_style
+
+      -- Toggle function
+      local function toggle_dark_light()
+        if current_style == 'light' then
+          current_style = 'dark'
+        else
+          current_style = 'light'
+        end
+        require('onedark').setup { style = current_style }
+        require('onedark').load()
+      end
+
+      vim.keymap.set('n', '<leader>ts', toggle_dark_light, { desc = 'Toggle between dark and light themes' })
     end,
   },
 
