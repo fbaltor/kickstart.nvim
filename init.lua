@@ -171,6 +171,10 @@ vim.o.shiftwidth = 2
 vim.o.expandtab = true
 vim.bo.softtabstop = 2
 
+-- allow the use of .nvim.lua to customize the nvim behavior project basesd
+vim.o.exrc = true
+vim.o.secure = true
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -237,6 +241,13 @@ vim.filetype.add {
     ['docker%-compose.*%.ya?ml'] = 'yaml.docker-compose',
     ['compose%.ya?ml'] = 'yaml.docker-compose',
     ['docker%-compose%.ya?ml%.tpl'] = 'yaml.docker-compose',
+  },
+}
+
+-- Setting dockerfile filetype
+vim.filetype.add {
+  pattern = {
+    ['Dockerfile_.*'] = 'dockerfile',
   },
 }
 
@@ -711,7 +722,7 @@ require('lazy').setup({
         mason = {
           -- clangd = {},
           -- gopls = {},
-          -- pyright = {},
+          pyright = {},
           -- rust_analyzer = {},
           -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
           --
@@ -852,7 +863,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'black' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -1127,6 +1138,11 @@ require('lazy').setup({
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
+  {
+    'ravsii/tree-sitter-d2',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    build = 'make nvim-install',
+  },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -1178,3 +1194,15 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- Toggle diagnostics
+function ToggleDiagnostics()
+  if vim.diagnostic.is_enabled() then
+    vim.diagnostic.enable(false)
+  else
+    vim.diagnostic.enable(true)
+  end
+end
+
+-- Map a keybinding to this function (e.g., <leader>d)
+vim.keymap.set('n', '<leader>d', ToggleDiagnostics, { desc = 'Toggle Diagnostics' })
