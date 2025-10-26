@@ -998,34 +998,33 @@ require('lazy').setup({
       local dark_styles = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer' }
       local is_dark = false
       for _, style in ipairs(dark_styles) do
-        if theme_state == style or theme_state == 'dark' then
+        if theme_state == style then
           is_dark = true
           break
         end
       end
 
-      local initial_style = is_dark and 'dark' or 'light'
+      local current_style = is_dark and 'dark' or 'light'
 
-      -- Setup and load the theme
+      -- Initial setup
       require('onedark').setup {
-        style = initial_style,
-        toggle_style_key = nil, -- we will handle toggle manually
+        style = current_style,
+        toggle_style_key = nil, -- we handle toggle manually
         toggle_style_list = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light' },
       }
       require('onedark').load()
 
-      -- Track current style
-      local current_style = initial_style
-
       -- Toggle function
       local function toggle_dark_light()
-        if current_style == 'light' then
-          current_style = 'dark'
-        else
-          current_style = 'light'
-        end
-        require('onedark').setup { style = current_style }
-        require('onedark').load()
+        current_style = (current_style == 'light') and 'dark' or 'light'
+
+        -- Re-setup with new style (required in navarasu/onedark.nvim)
+        require('onedark').setup {
+          style = current_style,
+          toggle_style_key = nil,
+          toggle_style_list = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light' },
+        }
+        require('onedark').load() -- ← NO arguments!
       end
 
       vim.keymap.set('n', '<leader>ts', toggle_dark_light, { desc = 'Toggle between dark and light themes' })
