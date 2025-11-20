@@ -720,7 +720,6 @@ require('lazy').setup({
         --
         --  Feel free to add/remove any LSPs here that you want to install via Mason. They will automatically be installed and setup.
         mason = {
-          -- clangd = {},
           -- gopls = {},
           pyright = {},
           -- rust_analyzer = {},
@@ -786,6 +785,9 @@ require('lazy').setup({
         -- Structure is identical to the mason table from above.
         others = {
           -- dartls = {},
+          clangd = {
+            cmd = { '/usr/bin/clangd' },
+          },
         },
       }
 
@@ -979,55 +981,36 @@ require('lazy').setup({
     'navarasu/onedark.nvim',
     priority = 1000,
     config = function()
-      -- Function to read theme state from file
-      local function read_theme_state()
-        local theme_file = vim.fn.expand '~/.config/theme_state'
-        local file = io.open(theme_file, 'r')
-        if file then
-          local content = file:read '*line'
-          file:close()
-          if content then
-            return content:match('^%s*(.-)%s*$'):lower()
-          end
+      local function apply_theme(style)
+        require('onedark').setup { style = style }
+        require('onedark').load()
+      end
+
+      local function get_system_theme()
+        local handle = io.popen 'gsettings get org.gnome.desktop.interface color-scheme'
+        if handle then
+          local result = handle:read '*a'
+          handle:close()
+          return result:match "'default'" and 'light' or 'dark'
         end
         return 'dark'
       end
 
-      -- Read current theme
-      local theme_state = read_theme_state()
-      local dark_styles = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer' }
-      local is_dark = false
-      for _, style in ipairs(dark_styles) do
-        if theme_state == style then
-          is_dark = true
-          break
-        end
-      end
-
-      local current_style = is_dark and 'dark' or 'light'
-
       -- Initial setup
-      require('onedark').setup {
-        style = current_style,
-        toggle_style_key = nil, -- we handle toggle manually
-        toggle_style_list = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light' },
-      }
-      require('onedark').load()
+      local current_style = get_system_theme()
+      apply_theme(current_style)
 
-      -- Toggle function
-      local function toggle_dark_light()
-        current_style = (current_style == 'light') and 'dark' or 'light'
+      -- Toggle mapping
+      vim.keymap.set('n', '<leader>ts', function()
+        current_style = current_style == 'light' and 'dark' or 'light'
+        apply_theme(current_style)
+      end, { desc = 'Toggle theme' })
 
-        -- Re-setup with new style (required in navarasu/onedark.nvim)
-        require('onedark').setup {
-          style = current_style,
-          toggle_style_key = nil,
-          toggle_style_list = { 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light' },
-        }
-        require('onedark').load() -- ← NO arguments!
-      end
-
-      vim.keymap.set('n', '<leader>ts', toggle_dark_light, { desc = 'Toggle between dark and light themes' })
+      -- Optional: Auto-refresh from system (run this command manually)
+      vim.keymap.set('n', '<leader>tr', function()
+        current_style = get_system_theme()
+        apply_theme(current_style)
+      end, { desc = 'Refresh theme from system' })
     end,
   },
 
