@@ -169,7 +169,7 @@ vim.o.confirm = true
 vim.o.tabstop = 2
 vim.o.shiftwidth = 2
 vim.o.expandtab = true
-vim.bo.softtabstop = 2
+vim.o.softtabstop = 2
 
 -- allow the use of .nvim.lua to customize the nvim behavior project basesd
 vim.o.exrc = true
@@ -732,11 +732,23 @@ require('lazy').setup({
           ts_ls = {
             workspace_required = true,
             root_markers = { 'tsconfig.json' },
+            root_dir = function(bufnr, on_dir)
+              local root = vim.fs.root(bufnr, { 'tsconfig.json', 'jsconfig.json', 'package.json' })
+              if root then
+                on_dir(root)
+              end
+            end,
           },
-          denols = {
-            workspace_required = true,
-            root_markers = { 'deno.json' },
-          },
+          -- denols = {
+          --   workspace_required = true,
+          --   root_markers = { 'deno.json' },
+          --   -- root_dir = function(bufnr, on_dir)
+          --   --   local root = vim.fs.root(bufnr, { 'deno.json' })
+          --   --   if root then
+          --   --     on_dir(root)
+          --   --   end
+          --   -- end,
+          -- },
           rust_analyzer = {},
           --
           lua_ls = {
@@ -869,10 +881,10 @@ require('lazy').setup({
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
-        typescript = { 'eslint_d' },
-        typescriptreact = { 'eslint_d' },
-        javascript = { 'eslint_d' },
-        javascriptreact = { 'eslint_d' },
+        -- typescript = { 'eslint_d' },
+        -- typescriptreact = { 'eslint_d' },
+        -- javascript = { 'eslint_d' },
+        -- javascriptreact = { 'eslint_d' },
       },
     },
   },
@@ -991,13 +1003,11 @@ require('lazy').setup({
       end
 
       local function get_system_theme()
-        local handle = io.popen 'gsettings get org.gnome.desktop.interface color-scheme'
-        if handle then
-          local result = handle:read '*a'
-          handle:close()
-          return result:match "'default'" and 'light' or 'dark'
+        local result = vim.fn.system('gsettings get org.gnome.desktop.interface color-scheme')
+        if vim.v.shell_error ~= 0 then
+          return 'dark'
         end
-        return 'dark'
+        return vim.trim(result):match('prefer%-dark') and 'dark' or 'light'
       end
 
       -- Initial setup
